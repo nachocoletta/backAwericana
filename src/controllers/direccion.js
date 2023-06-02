@@ -23,7 +23,7 @@ const obtenerDirecciones = async (req, res) => {
 
     return direcciones.length ? 
         res.status(200).json(direcciones) :
-        res.status(404).json({msg: `El usuario con ID ${id} no tiene direcciones asociadas`}) 
+        res.status(404).json({msg: `El usuario con ID ${idUsuario} no tiene direcciones asociadas`}) 
 }
 
 const eliminarDireccion = async (req, res) => {
