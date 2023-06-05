@@ -1,15 +1,9 @@
 const {Favoritos, Publicacion,Usuario } = require("../db");
 
 const obtenerFavoritos = async(req, res) => {
-    const {usuarioId} = req.params;
+    const {id : usuarioId} = req.user;
 
     try {
-        const usuario = await Usuario.findByPk(usuarioId);
-
-        if(!usuario){
-            return res.status(404).json({msg: `El usuario con el ID ${usuarioId} no existe.`})
-        } 
-
         const favoritos = await Favoritos.findAll({
             include:[Publicacion],
             where:{usuarioId}
@@ -39,17 +33,10 @@ const quitarDeFavoritos = async(usuarioId, publicacionId) => {
 }
 
 const alternarFavorito = async(req , res) =>{
-    const {usuarioId} = req.params;
+    const {id : usuarioId} = req.user;
     const {publicacionId} = req.body;
 
     try {
-
-        const usuario = await Usuario.findByPk(usuarioId);
-
-        if(!usuario){
-            return res.status(404).json({msg: `El usuario con el ID ${usuarioId} no existe.`})
-        } 
-
         const publicacion = await Publicacion.findOne({
             where: {
                 id: publicacionId,
@@ -91,19 +78,10 @@ const alternarFavorito = async(req , res) =>{
     }
 }
 
-
-
 const vaciarFavoritos = async(req, res) => {
-    const {usuarioId} = req.params;
+    const {id : usuarioId} = req.user;
 
     try {
-        const usuario = await Usuario.findByPk(usuarioId);
-
-
-        if( !usuario ){
-            return res.status(404).json({msg: `El usuario no existe.`})
-        }
-
         await Favoritos.destroy({
             where:{usuarioId}
         });

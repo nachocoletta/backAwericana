@@ -42,7 +42,7 @@ module.exports = (sequelize) => {
     },
     fechaNacimiento: {
       type: DataTypes.DATEONLY,
-      allowNull: false,
+      allowNull: true,
     },
     calificacion: {
       type: DataTypes.INTEGER,
@@ -51,6 +51,14 @@ module.exports = (sequelize) => {
     },
     dni: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    external_type: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    external_id: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
   });

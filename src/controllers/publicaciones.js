@@ -1,14 +1,14 @@
 
 const {Publicacion, Talle , Persona, Producto, Imagen, Pago} = require("../db");
 
-const { quitarPublicacionDeListas } = require("../Helpers/quitarPublicacionDeListas");
+const { quitarPublicacionDeListas } = require("../helpers/quitarPublicacionDeListas");
 
 const obtenerPublicaciones = async(req, res) => {
 
     const { limit = 25, offset= 0 } = req.query;
     
     const { rows } = await Publicacion.findAndCountAll({
-        include:[Talle, Persona, Producto, Pago],
+        include:[Talle, Persona, Producto, Pago, Imagen],
         where:{
             estado: 'habilitada'
         },
@@ -28,6 +28,7 @@ const obtenerPublicacion= async(req, res) => {
         where:{
             estado: 'habilitada'
         },
+        include: [{ model: Imagen }]
     });
 
     if(!publicacion){
@@ -38,8 +39,11 @@ const obtenerPublicacion= async(req, res) => {
 }
 
 const crearPublicacion = async(req, res) => {
-
-    let {fecha, precioOriginal, descuento, expiracionOferta, estado, talleId, personaId, productoId, imagenes, ...resto} = req.body;    
+    
+    let {fecha, precioOriginal, descuento, expiracionOferta, estado, talleId, personaId, productoId, imagenes, usuarioId: x, ...resto} = req.body;    
+    const {id : usuarioId} = req.user;
+    resto = {...resto, usuarioId}
+    
     const limiteImagenes = 10;
     try {
         const talle = await Talle.findByPk(talleId);
@@ -65,7 +69,7 @@ const crearPublicacion = async(req, res) => {
         }
 
         const imagenPortada = imagenes[0];
-        //imagenes.shift();
+       
 
         const body = {...resto, talleId, personaId, productoId, imagenPortada}
 
@@ -82,7 +86,7 @@ const crearPublicacion = async(req, res) => {
         }
 
         if(imagenes.length < limiteImagenes ){
-            for (let i = 0; i < (limiteImagenes  - imagenes.length) ; index++) {
+            for (let i = 0; i < (limiteImagenes  - imagenes.length) ; i++) {
                 imagenes = [...imagenes, ''];
             }
         }
@@ -108,7 +112,9 @@ const crearPublicacion = async(req, res) => {
 const actualizarPublicacion = async(req, res) => {
 
     const {id} = req.params;
-    let {fecha, precioOriginal, descuento, expiracionOferta, usuarioId , estado, talleId, personaId, productoId, imagenes, ...cambios} = req.body;
+    let {fecha, precioOriginal, descuento, expiracionOferta, usuarioId: x , estado, talleId, personaId, productoId, imagenes, ...cambios} = req.body;
+    const {id : usuarioId} = req.user;
+    cambios = {...cambios, usuarioId}
     const limiteImagenes = 10;
 
     try {
@@ -182,12 +188,15 @@ const actualizarPublicacion = async(req, res) => {
 
 const configurarDescuento = async( req, res) =>{
     const {id} = req.params;
-    const {descuento = 0, expiracion} = req.body;
+    const {id : usuarioId} = req.user;
+    const {descuento} = req.body;
         
     try {
-        const publicacion = await Publicacion.findByPk(id, {
+        const publicacion = await Publicacion.findOne({
             where:{
-                estado: 'habilitada'
+                id,
+                estado: 'habilitada',
+                usuarioId
             },
         });
 
@@ -195,15 +204,13 @@ const configurarDescuento = async( req, res) =>{
             return res.status(404).json({msg: `La publicación con el id:${id} no existe.`})
         }
 
-        if(descuento !== 0 && expiracion){
+        if(!publicacion.oferta){
             const precioCopia = publicacion.precio;
-            const expiracionOferta = new Date(Date.parse(expiracion));
             
             const cambios = {
                 precio : publicacion.precio - (publicacion.precio * (descuento / 100)),
                 precioOriginal: precioCopia,
                 oferta: true,
-                expiracionOferta,
                 descuento
             }
 
@@ -217,8 +224,7 @@ const configurarDescuento = async( req, res) =>{
             const cambios = { 
                 oferta: false,
                 precioOriginal: null,
-                descuento: 0,
-                expiracionOferta: null
+                descuento: 0
             }
            
             publicacion.precioOriginal && (cambios.precio = publicacion.precioOriginal);
@@ -243,7 +249,15 @@ const configurarDescuento = async( req, res) =>{
 const eliminarPublicacion = async(req, res) => {
 
     const {id} = req.params;
-    const publicacion = await Publicacion.findByPk(id);
+    const {id : usuarioId} = req.user;
+
+    const publicacion = await Publicacion.findOne({
+        where: {
+            id,
+            estado: 'habilitada',
+            usuarioId
+        }
+    });
 
     if(!publicacion){
         return res.status(404).json({msg: `La publicación con el id:${id} no existe.`})

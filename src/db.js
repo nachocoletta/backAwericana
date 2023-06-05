@@ -4,18 +4,18 @@ const fs = require("fs");
 const path = require("path");
 const { DB_USER, DB_PASSWORD, DB_HOST, DB_NAME, URL } = process.env;
 
-// const sequelize = new Sequelize(
-//   `postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}`,
-//   {
-//     logging: false, // set to console.log to see the raw SQL queries
-//     native: false, // lets Sequelize know we can use pg-native for ~30% more speed
-//   }
-// );
+const sequelize = new Sequelize(
+  `postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}`,
+  {
+    logging: false, // set to console.log to see the raw SQL queries
+    native: false, // lets Sequelize know we can use pg-native for ~30% more speed
+  }
+);
 
-const sequelize = new Sequelize(URL, {
-  logging: false, // set to console.log to see the raw SQL queries
-  native: false, // lets Sequelize know we can use pg-native for ~30% more speed
-}); //
+// const sequelize = new Sequelize(URL, {
+//   logging: false, // set to console.log to see the raw SQL queries
+//   native: false, // lets Sequelize know we can use pg-native for ~30% more speed
+// }); //
 
 const basename = path.basename(__filename);
 
@@ -43,6 +43,7 @@ sequelize.models = Object.fromEntries(capsEntries);
 
 // En sequelize.models están todos los modelos importados como propiedades
 // Para relacionarlos hacemos un destructuring
+console.log(sequelize.models);
 const {
   // Categoria,
   Direccion,
@@ -57,6 +58,7 @@ const {
   Pago,
   Banner,
   Pais,
+  Review,
 } = sequelize.models;
 
 // Aca vendrian las relaciones
@@ -72,7 +74,7 @@ Producto.belongsTo(Categoria);
 Categoria.hasMany(Producto);
 
 Imagen.belongsTo(Publicacion);
-Publicacion.hasMany(Imagen);
+Publicacion.hasMany(Imagen, { order: [["id", "DESC"]] });
 
 Usuario.hasMany(Publicacion);
 Publicacion.belongsTo(Usuario);
@@ -80,11 +82,11 @@ Publicacion.belongsTo(Usuario);
 Usuario.hasMany(Direccion);
 Direccion.belongsTo(Usuario);
 
-Pais.hasMany(Direccion)
-Direccion.belongsTo(Pais)
+Pais.hasMany(Direccion);
+Direccion.belongsTo(Pais);
 
-Pago.belongsToMany(Publicacion, { through: 'PagoPublicacion' });
-Publicacion.belongsToMany(Pago, { through: 'PagoPublicacion' });
+Pago.belongsToMany(Publicacion, { through: "PagoPublicacion" });
+Publicacion.belongsToMany(Pago, { through: "PagoPublicacion" });
 
 Usuario.belongsToMany(Publicacion, { through: "Carrito" });
 Publicacion.belongsToMany(Usuario, { through: "Carrito" });
@@ -107,8 +109,11 @@ const { Favoritos } = sequelize.models;
 Favoritos.belongsTo(Publicacion);
 Favoritos.belongsTo(Usuario);
 
+Usuario.hasMany(Review, { foreignKey: "usuario_id" });
+Usuario.hasMany(Review, { foreignKey: "usuario_admin_id" });
+Review.belongsTo(Usuario, { foreignKey: "usuario_id" });
+Review.belongsTo(Usuario, { foreignKey: "usuario_admin_id" });
 
-// comentario de prueba para redeploy
 module.exports = {
   ...sequelize.models, // para poder importar los modelos así: const { Product, User } = require('./db.js');
   conn: sequelize, // para importart la conexión { conn } = require('./db.js');

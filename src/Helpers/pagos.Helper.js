@@ -27,15 +27,16 @@ const getPagoById = async (req, res) => {
 };
 
 // Crear un nuevo pago
-async function createPago(ultimosdigitos, estado, tipoDeOperacion, precio, publicaciones, userId){
+async function createPago(ultimosdigitos, estado, tipoDeOperacion, precioTotal, publicaciones, userId, transaccionId, precioDeEnvio){
   try {
     const nuevoPago = await Pago.create({
       ultimosdigitos,
       estado,
       tipoDeOperacion,
-      precio,
+      precioTotal,
       userId,
-      transaccionId
+      transaccionId,
+      precioDeEnvio
     });
 
     console.log(nuevoPago)

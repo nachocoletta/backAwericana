@@ -1,18 +1,19 @@
 const { Direccion, Usuario, Pais } = require("../db");
+const axios = require('axios');
 
 // obtenerDirecciones,
 //     obtenerDireccion,
 //     crearDireccion,
 //     modificarDireccion
 const obtenerDirecciones = async (req, res) => {
-    const { idUsuario } = req.query;
+    const { id } = req.user;
 
     const direcciones = await Direccion.findAll({
         include: [
             {
                 model: Usuario,
                 where: {
-                    id: idUsuario
+                    id: id
                 }
             },
             {
@@ -23,11 +24,10 @@ const obtenerDirecciones = async (req, res) => {
 
     return direcciones.length ? 
         res.status(200).json(direcciones) :
-        res.status(404).json({msg: `El usuario con ID ${idUsuario} no tiene direcciones asociadas`}) 
+        res.status(404).json({msg: `El usuario con ID ${id} no tiene direcciones asociadas`}) 
 }
 
 const eliminarDireccion = async (req, res) => {
-    const { idUsuario } = req.query;
     const { id } = req.params
     
     try {
@@ -49,27 +49,49 @@ const eliminarDireccion = async (req, res) => {
 }
 
 const crearDireccion = async (req, res) => {
-    const { idUsuario } = req.query
-    const { calle, numeracion, codigoPostal, ciudad, provincia, idPais } = req.body
-
+    // const { idUsuario } = req.query
+    const { id } = req.user
+    let { calle, numeracion, codigoPostal, ciudad, provincia, idPais} = req.body
+    // idPais
     try {
-        const usuario = await Usuario.findByPk(idUsuario)
+        const usuario = await Usuario.findByPk(id)
 
         if(!usuario){
-            return res.status(404).json({msg: `Usuario con ID: ${idUsuario} no encontrado`})
+            return res.status(404).json({msg: `Usuario con ID: ${id} no encontrado`})
         }
 
+        calle = calle.toLowerCase()
+        ciudad = ciudad.toLowerCase()
+        provincia = provincia.toLowerCase()
+        
+
+
+        const apiKey = 'AIzaSyAwTdbSN0Fg920LnRkk2zxw-c2C_TupLZc';
+        const direccionCompleta = `${calle} ${numeracion}, ${codigoPostal} ${ciudad}, ${provincia}`;
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccionCompleta)}&key=${apiKey}`;
+
+        const response = await axios.get(url);
+        const { status, results } = response.data;
+
+        // console.log( status, results )
+        const { lat, lng } = results[0].geometry.location;
+        
         const direccion = await Direccion.create({
             calle,
             numeracion,
             codigoPostal,
             ciudad,
-            provincia
+            provincia,
+            latitud: lat,
+            longitud: lng
         })
+
+
+        // console.log('coordenadas', lat, lng )
 
         const pais = await Pais.findByPk(idPais)
 
-        console.log(pais)
+        // console.log(pais)
         await direccion.setUsuario(usuario)
         await direccion.setPai(pais)
 

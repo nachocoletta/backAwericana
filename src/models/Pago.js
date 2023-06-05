@@ -31,7 +31,11 @@ module.exports = (sequelize) => {
     transaccionId:{
       type: DataTypes.STRING,
     },
-    precio: {
+    precioTotal: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    precioDeEnvio: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },

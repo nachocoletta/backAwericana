@@ -9,6 +9,7 @@ const {
     obtenerPublicacion,
     obtenerPublicaciones
 } = require("../controllers/publicaciones");
+const authMiddleware = require("../middlewares/session");
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.get('/' ,    obtenerPublicaciones);
 router.get('/:id' , obtenerPublicacion);
 
 router.post('/' , [
+    authMiddleware,
     body('precio', 'El valor del precio no es valido.').isDecimal().notEmpty(),
     body('titulo', 'El titulo debe tener entre 1 y 50 caracteres').isString().isLength({min:1, max:50}),
     body('descripcion', 'La descripción debe tener entre 10 y 200 caracteres').isString().isLength({min:10, max:200}),
@@ -28,6 +30,7 @@ router.post('/' , [
 ], crearPublicacion);
 
 router.put('/:id' , [
+    authMiddleware,
     body('precio', 'El valor del precio no es valido.').isDecimal().notEmpty(),
     body('titulo', 'El titulo debe tener entre 1 y 50 caracteres').isString().isLength({min:1, max:50}),
     body('descripcion', 'La descripción debe tener entre 10 y 200 caracteres').isString().isLength({min:10, max:200}),
@@ -39,10 +42,13 @@ router.put('/:id' , [
 ], actualizarPublicacion);
 
 router.patch('/:id' , [
+    authMiddleware,
     body('descuento', 'El valor del descuento debe ser entero entre 1 y 99').optional().isInt({min:1, max:99}),
     validarCampos
 ], configurarDescuento);
 
-router.delete('/:id' ,  eliminarPublicacion);
+router.delete('/:id' ,[
+    authMiddleware
+],  eliminarPublicacion);
 
 module.exports = router;

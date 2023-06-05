@@ -20,17 +20,15 @@
 
 const server = require("./src/app.js");
 const { conn } = require("./src/db.js");
+const poblarBaseDeDatos = require("./src/seeders/cargaBaseDeDatos.js");
 
 // Syncing all the models at once.
-const PORT = process.env.PORT || 3001
-// Syncing all the models at once.
+// hooks
+require("./src/Helpers/updateReviews.js");
+
 conn.sync({ force: false }).then(() => {
-  server.listen(PORT, () => {
+  // poblarBaseDeDatos(); //comentada para evitar muchas consultas, usar endpoint
+  server.listen(3001, () => {
     console.log("%s listening at 3001"); // eslint-disable-line no-console
   });
 });
-// conn.sync({ force: false }).then(() => {
-//   server.listen(3001, () => {
-//     console.log("%s listening at 3001"); // eslint-disable-line no-console
-//   });  
-// });

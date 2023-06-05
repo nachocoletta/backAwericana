@@ -1,34 +1,36 @@
 const {Carrito, Publicacion,Usuario } = require("../db");
 
+//Función para sumar los precios de un array de productos
 const calcularMonto = (carrito) => {
     let monto = 0;
     
+    //Acumular los precios en la variable 'monto'
     carrito.forEach(item => {
         if(item.publicacion.estado === 'habilitada' ){
             monto = monto + item.publicacion.precio;
         }       
     });
 
+    //Devolver el monto
     return monto;
 }
 
+//Controlador para obtener el carrito del usuario logueado
 const obtenerCarrito = async(req, res) => {
-    const {usuarioId} = req.params;
+    //Obtener Id del usuario logueado
+    const {id : usuarioId} = req.user;
 
     try {
-        const usuario = await Usuario.findByPk(usuarioId);
-
-        if(!usuario){
-            return res.status(404).json({msg: `El usuario con el ID ${usuarioId} no existe.`})
-        } 
-
+        //Buscar en la tabla carrito las publicaciones que coincidan con el id del usuario
         const carrito = await Carrito.findAll({
             include:[Publicacion],
             where:{usuarioId}
         });
 
+        //Sumar el costo de las publicaciones obtenidas
         const montoTotal = calcularMonto(carrito);
 
+        //Devolver el monto y la lista de publicaciones que se encuentran en el carrito
         res.json({montoTotal, carrito});
 
     } catch (error) {
@@ -38,18 +40,14 @@ const obtenerCarrito = async(req, res) => {
     
 }
 
+//Controlador para agregar publicaciones al carrito
 const agregarAlCarrito = async(req, res) => {
-    const {usuarioId} = req.params;
+    //Obtener el id del usuario logueado y datos recibidos
+    const {id : usuarioId} = req.user;
     const {publicacionId} = req.body;
 
     try {
-
-        const usuario = await Usuario.findByPk(usuarioId);
-
-        if( !usuario ){
-            return res.status(404).json({msg: `El usuario no existe.`})
-        }
-
+        //Buscar la publicación 
         const publicacion = await Publicacion.findOne({
             where: {
                 id: publicacionId,
@@ -57,10 +55,12 @@ const agregarAlCarrito = async(req, res) => {
             } 
         });
 
+        //Retornar si la publicación no existe
         if( !publicacion ){
             return res.status(404).json({msg: `La publicación no existe.`})
         }
 
+        //Verificar si la publicación que se quiere agregar es del propio usuario
         const esPubliPropia = await Publicacion.findOne({
             where: {
                 id: publicacionId,
@@ -68,22 +68,27 @@ const agregarAlCarrito = async(req, res) => {
             }
         });
 
+        //Retornar si la publicación es del propio usuario
         if(esPubliPropia){
             return res.json({msg: 'No puede agregar al carrito su propia publicación'});
         }
 
+        //Verificar si la publicación existe en el carrito 
         const existe = await Carrito.findOne({where: {
             usuarioId,
             publicacionId
         }});
 
+        //Retornar si la publicación existe en el carrito
         if(existe){
             return res.json('La publicación ya se encuentra en el carrito de compra.');
         }
 
+        //Agregar al carrito
         const itemDeCarrito = await Carrito.create({usuarioId, publicacionId});
         await itemDeCarrito.save();
 
+        //Devolver mensaje
         res.json({msg: 'La publicación fue agregada al carrito.'});
 
     } catch (error) {
@@ -93,34 +98,39 @@ const agregarAlCarrito = async(req, res) => {
 }
 
 const quitarDelCarrito = async(req, res) => {
-    const {usuarioId} = req.params;
-    const {publicacionId = 0} = req.body;
+    //Obtener el id del usuario logueado y los datos recibidos
+    const { id : usuarioId  } = req.user;
+    const { publicacionId = 0 } = req.body;
 
     try {
-        const usuario = await Usuario.findByPk(usuarioId);
-        
-
-        if( !usuario ){
-            return res.status(404).json({msg: `El usuario no existe.`})
-        }
-
+        //Si no se recibio el id de una publicación
         if(publicacionId === 0){
+             //Vaciar el carrito
             await Carrito.destroy({
                 where:{usuarioId}
             });
-            res.json({msg: 'Se han quitado todas las publicaciones del carrito.'});
 
+            //Devolver mensaaje
+            res.json({msg: 'Se han quitado todas las publicaciones del carrito.'});
+        
         }else{
+            //Buscar la publicación
             const publicacion = await Publicacion.findByPk(publicacionId);
+
+            //Retornar si no existe
             if( !publicacion ){
                 return res.status(404).json({msg: `La publicación no existe.`})
             }
+
+            //Quitar publicación del carrito
             await Carrito.destroy({
                 where:{
                     usuarioId,
                     publicacionId
                 }
             });
+
+            //Devolver mensaje
             res.json({msg: 'La publicación fue removida del carrito.'});
         }
 

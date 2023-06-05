@@ -24,11 +24,9 @@ const obtenerUsuario = async (req, res) => {
 
     return usuario
       ? res.status(200).json(usuario)
-      : res
-          .status(400)
-          .json({
-            msg: `El usuario con ID: ${id} no se encuentra en la base de datos`,
-          });
+      : res.status(400).json({
+          msg: `El usuario con ID: ${id} no se encuentra en la base de datos`,
+        });
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ error: error.message });
@@ -36,39 +34,40 @@ const obtenerUsuario = async (req, res) => {
 };
 
 const actualizarUsuario = async (req, res) => {
-  const { id } = req.params;
-//   const { nombre, apellido, email, rol, imagen, fechaNacimiento } = req.body;
+  const { id } = req.user;
+  //   const { nombre, apellido, email, rol, imagen, fechaNacimiento } = req.body;
 
-  const { nombre, apellido, fechaNacimiento, dni } = req.body;
+  const { nombre, apellido, fechaNacimiento, dni, calificacion } = req.body;
 
   try {
     const usuario = await Usuario.findOne({
-        where: {
-            id
-        }
+      where: {
+        id,
+      },
     });
 
     if (!usuario) {
-      return res
-        .status(404)
-        .json({
-          msg: `El usuario con el ID: ${id} no se encuentra en la base de datos`,
-        });
+      return res.status(404).json({
+        msg: `El usuario con el ID: ${id} no se encuentra en la base de datos`,
+      });
     } else {
-        const user = await Usuario.update(
-            {
-              nombre,
-              apellido,
-              fechaNacimiento,
-              dni,
-            },
-            {
-              where: {
-                id
-              }
-            }
-          );
-        res.status(200).json({msg: `Usuario con ID: ${id} correctamente actualizado`, user})
+      const user = await Usuario.update(
+        {
+          nombre,
+          apellido,
+          fechaNacimiento,
+          dni,
+          calificacion,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+      res
+        .status(200)
+        .json({ msg: `Usuario con ID: ${id} correctamente actualizado`, user });
     }
   } catch (error) {
     console.log(error.message);
@@ -77,70 +76,74 @@ const actualizarUsuario = async (req, res) => {
 };
 
 const inhabilitarOHabilitarUsuario = async (req, res) => {
-    const { id } = req.params;
-    const { habilitado } = req.query
-    try {
-        const usuario = await Usuario.findByPk(id)
+  const { id } = req.user;
+  const { habilitado } = req.query;
+  try {
+    const usuario = await Usuario.findByPk(id);
 
-        if(!usuario){
-            res.status(404).json({msg: `El usuario con ID: ${id} no se encuentra en la base de datos`})
-        }else {
-            await Usuario.update({
-                habilitado
-            },
-            {
-                where: {
-                    id
-                }
-            })
-            res.status(200).json({msg: `Usuario con ID: ${id} correctamente actualizado`})
+    if (!usuario) {
+      res.status(404).json({
+        msg: `El usuario con ID: ${id} no se encuentra en la base de datos`,
+      });
+    } else {
+      await Usuario.update(
+        {
+          habilitado,
+        },
+        {
+          where: {
+            id,
+          },
         }
-
-
-    }catch(error){
-        console.log(error.message);
-        return res.status(500).json({error: error.message})
+      );
+      res
+        .status(200)
+        .json({ msg: `Usuario con ID: ${id} correctamente actualizado` });
     }
-}
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 const obtenerPublicaciones = async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
 
   const publicaciones = await Publicacion.findAll({
     where: {
       usuarioId: id,
-      estado: 'habilitada'
-    }
-  })
+      estado: "habilitada",
+    },
+  });
 
-  res.json(publicaciones)
-}
+  res.json(publicaciones);
+};
 
 const obtenerVentas = async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.user;
 
   const ventasConcretadas = await Publicacion.findAll({
     where: {
       usuarioId: id,
-      estado: 'finalizada'
-    }
-  })
+      estado: "finalizada",
+    },
+  });
 
-  res.json(ventasConcretadas)
-}
+  res.json(ventasConcretadas);
+};
 
 const obtenerCompras = async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.user;
 
   const comprasHechas = await Publicacion.findAll({
     where: {
       compradorId: id,
-      estado: 'finalizada',
-    }
-  })
+      estado: "finalizada",
+    },
+  });
 
-  res.json(comprasHechas)
-}
+  res.json(comprasHechas);
+};
 
 module.exports = {
   obtenerUsuarios,
@@ -149,5 +152,5 @@ module.exports = {
   inhabilitarOHabilitarUsuario,
   obtenerPublicaciones,
   obtenerVentas,
-  obtenerCompras
+  obtenerCompras,
 };

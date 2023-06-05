@@ -1,4 +1,4 @@
-let tipoPersonas = [
+let personas = [
   {
     id: 1,
     nombre: "HOMBRE",
@@ -22,5 +22,5 @@ let tipoPersonas = [
 ];
 
 module.exports = {
-  tipoPersonas,
+  personas
 };

@@ -1,16 +1,40 @@
 const router = require("express").Router();
 const passport = require("passport");
-
+const { Usuario } = require("../db");
 const CLIENT_URL = "http://localhost:3000/";
 
-router.get("/login/success", (req, res) => {
-  if (req.user) {
-    res.status(200).json({
-      success: true,
-      message: "successfull",
-      user: req.user,
-      //   cookies: req.cookies
-    });
+router.get("/login/success", async (req, res) => {
+  try {
+    if (req.user) {
+      const user = await Usuario.findOne({
+        where: { email: req.user._json.email },
+      });
+      if (user) {
+        res.status(200).json({
+          success: true,
+          message: "successfull",
+          user: req.user,
+        });
+      } else {
+        const body = {
+          nombre: req.user.name.givenName,
+          apellido: req.user.name.familyName,
+          email: req.user._json.email,
+          password: req.user.id,
+          external_type: req.user.provider,
+          external_id: req.user.id,
+        };
+
+        await Usuario.create(body);
+        res.status(200).json({
+          success: true,
+          message: "successfull",
+          user: req.user,
+        });
+      }
+    }
+  } catch (error) {
+    handleHttpError(res, error.message, 500);
   }
 });
 
@@ -26,7 +50,10 @@ router.get("/logout", (req, res) => {
   res.redirect(CLIENT_URL);
 });
 
-router.get("/google", passport.authenticate("google", { scope: ["profile"] }));
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
 router.get(
   "/google/callback",

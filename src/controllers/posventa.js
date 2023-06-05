@@ -1,4 +1,4 @@
-const { simularTracking } = require("../Helpers/simularTracking");
+const { simularTracking } = require("../helpers/simularTracking");
 const transporter = require("../config/mailer");
 const {Publicacion, Usuario} = require("../db");
 
@@ -58,7 +58,8 @@ const enviarReclamo = async ({name, mail, subject, message, image, compradorId, 
 }
 
 const chequearReclamo = async (req, res) => {
-    const {compradorId, publicacionId} = req.body;
+    const {id : compradorId} = req.user;
+    const {publicacionId} = req.body;
 
     const estado = await verificarDisponibilidadReclamo(publicacionId, compradorId);
 
@@ -66,7 +67,8 @@ const chequearReclamo = async (req, res) => {
 }
 
 const iniciarReclamo = async (req, res) => {
-    const {nombre, correo, subject, message, image, compradorId, publicacionId} = req.body;
+    const {id : compradorId} = req.user;
+    const {nombre, correo, subject, message, image, publicacionId} = req.body;
 
     if(await verificarDisponibilidadReclamo(publicacionId, compradorId) === 'permitido'){
 
@@ -97,7 +99,8 @@ const iniciarReclamo = async (req, res) => {
 }
 
 const actualizarEstadoEnvio = async (req, res) => {
-    const {publicacionId, compradorId} = req.body;
+    const {id : compradorId} = req.user;
+    const {publicacionId} = req.body;
     
     await simularTracking(publicacionId, compradorId);
 
@@ -105,12 +108,13 @@ const actualizarEstadoEnvio = async (req, res) => {
 }
 
 const revelarVendedor = async (req, res) => {
-    const {publicacionId, usuarioId} = req.body;
+    const {id : compradorId} = req.user;
+    const {publicacionId} = req.body;
 
     const publicacion = await Publicacion.findOne({
         where: {
             id: publicacionId,
-            compradorId: usuarioId
+            compradorId
         }
     })
 
@@ -126,7 +130,8 @@ const revelarVendedor = async (req, res) => {
 }
 
 const avanzarDevolucion = async (req, res) => {
-    const {publicacionId, compradorId} = req.body;
+    const {id : compradorId} = req.user;
+    const {publicacionId} = req.body;
 
     const publicacion = await Publicacion.findOne({
         where: {

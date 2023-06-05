@@ -1,4 +1,4 @@
-let tipoProductos = [
+let categorias = [
     {
    
       nombre: "PANTALONES",
@@ -33,5 +33,5 @@ let tipoProductos = [
   ];
   
   module.exports = {
-      tipoProductos
+      categorias
   }
