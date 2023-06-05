@@ -1,4 +1,4 @@
-const { simularTracking } = require("../helpers/simularTracking");
+const { simularTracking } = require("../Helpers/simularTracking");
 const transporter = require("../config/mailer");
 const {Publicacion, Usuario} = require("../db");
 
