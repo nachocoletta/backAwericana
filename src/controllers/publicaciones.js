@@ -2,7 +2,7 @@
 const {Publicacion, Talle , Persona, Producto, Imagen, Pago} = require("../db");
 
 const { quitarPublicacionDeListas } = require("../helpers/quitarPublicacionDeListas");
-
+//
 const obtenerPublicaciones = async(req, res) => {
 
     const { limit = 25, offset= 0 } = req.query;
