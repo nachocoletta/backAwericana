@@ -28,8 +28,8 @@ require("./src/Helpers/updateReviews.js");
 
 const PORT = process.env.PORT || 3001
 
-conn.sync({ force: false }).then(() => {
-  // poblarBaseDeDatos(); //comentada para evitar muchas consultas, usar endpoint
+conn.sync({ force: true }).then(() => {
+  poblarBaseDeDatos(); //comentada para evitar muchas consultas, usar endpoint
   server.listen(PORT, () => {
     console.log("%s listening at 3001"); // eslint-disable-line no-console
   });
