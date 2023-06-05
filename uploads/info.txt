@@ -1,0 +1,2 @@
+en esta carpeta se van a subir los archivos de cloudinary
+que luego seran eliminados
