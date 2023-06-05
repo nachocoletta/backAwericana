@@ -12,7 +12,13 @@ const { DB_USER, DB_PASSWORD, DB_HOST, DB_NAME, URL_DB } = process.env;
 //   }
 // );
 //
-const sequelize = new Sequelize(URL_DB, {
+// const sequelize = new Sequelize(URL_DB, {
+//   logging: false, // set to console.log to see the raw SQL queries
+//   native: false, // lets Sequelize know we can use pg-native for ~30% more speed
+// }); //
+
+const DB_VERCEL = `postgres://default:QiKogAG8ZV5s@ep-lively-silence-817954.us-east-1.postgres.vercel-storage.com:5432/verceldb`
+const sequelize = new Sequelize(DB_VERCEL, {
   logging: false, // set to console.log to see the raw SQL queries
   native: false, // lets Sequelize know we can use pg-native for ~30% more speed
 }); //
