@@ -13,7 +13,10 @@ const {
   validatorLoginUser,
 } = require("../validators/authValidator");
 router.get("/", userGet);
+
+//Debe tener 8 caracteres, una mayuscula, un numero y un caracter especial
 router.post("/register", validatorRegisterUser, userRegister);
+
 router.post("/login", validatorLoginUser, userLogin);
 router.get("/loginLocal/success", authMiddleware, loginSuccess);
 router.get("/logoutLocal", logoutUser);

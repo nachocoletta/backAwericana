@@ -10,6 +10,7 @@ const {
     obtenerPublicaciones
 } = require("../controllers/publicaciones");
 const authMiddleware = require("../middlewares/session");
+const checkRole = require("../middlewares/role");
 
 const router = Router();
 
@@ -48,7 +49,8 @@ router.patch('/:id' , [
 ], configurarDescuento);
 
 router.delete('/:id' ,[
-    authMiddleware
+    authMiddleware,
+    checkRole(['admin', 'user']),
 ],  eliminarPublicacion);
 
 module.exports = router;

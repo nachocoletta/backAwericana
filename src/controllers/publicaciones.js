@@ -1,7 +1,7 @@
 
 const {Publicacion, Talle , Persona, Producto, Imagen, Pago} = require("../db");
 
-const { quitarPublicacionDeListas } = require("../Helpers/quitarPublicacionDeListas");
+const { quitarPublicacionDeListas } = require("../helpers/quitarPublicacionDeListas");
 
 const obtenerPublicaciones = async(req, res) => {
 

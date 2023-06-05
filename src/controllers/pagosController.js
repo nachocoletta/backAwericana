@@ -1,9 +1,9 @@
 const mercadopago = require("mercadopago");
 const { Publicacion, Carrito, Usuario, Direccion } = require("../db");
-const { finalizarPublicacion } = require("../Helpers/finalizarPublicacion");
+const { finalizarPublicacion } = require("../helpers/finalizarPublicacion");
 const { ACCESS_TOKEN_MP, URL_FRONT, URL,  URL_NOTIFICATION } = process.env;
-const { createPago } = require("../Helpers/pagos.Helper");
-const calcularDistancia = require("../Helpers/calcularEnvio");
+const { createPago } = require("../helpers/pagos.Helper");
+const calcularDistancia = require("../helpers/calcularEnvio");
 
 mercadopago.configure({
   access_token: ACCESS_TOKEN_MP,

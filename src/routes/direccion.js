@@ -12,9 +12,8 @@ const authMiddleware = require("../middlewares/session");
 
 const router = Router();
 
-router.get('/', 
-    [ authMiddleware ], 
-    obtenerDirecciones)
+router.get('/', [ authMiddleware ], obtenerDirecciones);
+
 router.post('/', 
     [
         authMiddleware,
@@ -26,8 +25,14 @@ router.post('/',
         body('idPais', 'El campo id pais no puede ser nulo').isInt().isLength({min: 1}),
         validarCampos
     ],
-    crearDireccion)
-router.put('/:id', modificarDireccion)
-router.delete('/:id', eliminarDireccion)
+crearDireccion);
+
+router.put('/:id', [ 
+    authMiddleware
+], modificarDireccion);
+
+router.delete('/:id' , [ 
+    authMiddleware
+], eliminarDireccion);
 
 module.exports = router;

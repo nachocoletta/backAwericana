@@ -16,7 +16,7 @@ function generarPrendas(cantidad) {
     const prenda = {
       nombre: faker.commerce.productName(),
       descripion: faker.commerce.productDescription(),
-      talle: faker.Helpers.arrayElement(["S", "M", "L", "XL"]),
+      talle: faker.helpers.arrayElement(["S", "M", "L", "XL"]),
       color: faker.vehicle.color(),
       marca: faker.commerce.productAdjective(),
       imagen: [

@@ -22,15 +22,18 @@ const validatorRegisterUser = [
     .notEmpty()
     .withMessage("El correo electrónico no puede estar vacío")
     .isEmail()
-    .withMessage("El correo electrónico no es válido"),
+    .withMessage("El correo electrónico no es válido")
+    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+    .withMessage("El email no cumple con los requisitos"),
   check("password")
     .exists()
     .withMessage("La contraseña es requerida")
     .notEmpty()
     .withMessage("La contraseña no puede estar vacía")
-    .isLength({ min: 6, max: 30 })
-    .withMessage("La contraseña debe tener entre 6 y 30 caracteres"),
-
+    .isLength({ min: 8, max: 30 })
+    .withMessage("La contraseña debe tener entre 8 y 30 caracteres")
+    .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/)
+    .withMessage("La contraseña no cumple con los requisitos"),
   check("dni")
     .exists()
     .withMessage("El DNI es requerido")

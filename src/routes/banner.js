@@ -6,12 +6,21 @@ const {
     subirImagen,
     borrarImagen
 } = require("../controllers/banner.js");
-
+const authMiddleware = require("../middlewares/session");
+const checkRole = require("../middlewares/role");
 
 const router = Router();
 
-router.get('/', obtenerImagenes)
-router.post('/', subirImagen)
-router.delete('/:id', borrarImagen)
+router.get('/', obtenerImagenes);
+
+router.post('/', [
+    authMiddleware,
+    checkRole(['admin'])
+], subirImagen);
+
+router.delete('/:id', [
+    authMiddleware,
+    checkRole(['admin'])
+], borrarImagen)
 
 module.exports = router;

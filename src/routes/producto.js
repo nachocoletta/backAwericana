@@ -9,24 +9,34 @@ const {
     obtenerTodosLosProductos
 } = require("../controllers/producto.js");
 
+const authMiddleware = require("../middlewares/session");
+const checkRole = require("../middlewares/role");
+
 const router = Router();
 
 
-router.get('/', obtenerProducto)
-router.get('/todos', obtenerTodosLosProductos)
+router.get('/', obtenerProducto);
+
+router.get('/todos', obtenerTodosLosProductos);
 
 router.post('/', [
+    authMiddleware,
+    checkRole(['admin']),
     body('nombre', 'El nombre debe tener entre 3 y 50 caracteres').isString().trim().isLength({min:3, max:50}),
     validarCampos
-    ]
-    ,crearProducto);
+] ,crearProducto);
 
 router.put('/:id', [
+    authMiddleware,
+    checkRole(['admin']),
     body('nombre', 'El nombre debe tener entre 3 y 50 caracteres').isString().trim().isLength({min:3, max:50}),
     validarCampos
 ], actualizarProducto);
 
-router.delete('/:id', eliminarProducto)
+router.delete('/:id', [
+    authMiddleware,
+    checkRole(['admin']),
+], eliminarProducto)
 
 
 module.exports = router;

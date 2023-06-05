@@ -2,8 +2,8 @@ const { handleHttpError } = require("../utils/handleError");
 
 const checkRole = (roles) => async (req, res, next) => {
   try {
-    const { user } = req;
-    const rolesByUser = user.role;
+    const { rol } = req.user;
+    const rolesByUser = rol;
     const checkValueRol = roles.some((rolSingle) =>
       rolesByUser.includes(rolSingle)
     );

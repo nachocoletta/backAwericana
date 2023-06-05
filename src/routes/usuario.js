@@ -11,6 +11,7 @@ const {
     obtenerPublicaciones
 } = require("../controllers/usuario");
 const authMiddleware = require("../middlewares/session");
+const checkRole = require("../middlewares/role");
 
 
 const router = Router();
@@ -28,7 +29,8 @@ router.put('/:id', [
  ,actualizarUsuario)
 
 router.put('/:id/inhabilitarOHabilitar', [
-    authMiddleware
+    authMiddleware,
+    checkRole(['admin', 'user']),
 ], inhabilitarOHabilitarUsuario);
 
 router.get('/:id/compras' , [
