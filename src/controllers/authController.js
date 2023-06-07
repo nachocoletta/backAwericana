@@ -113,4 +113,66 @@ const loginSuccess = (req, res) => {
   }
 };
 
-module.exports = { userRegister, userLogin, userGet, logoutUser, loginSuccess };
+const changePassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await Usuario.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "No se encontró ningún usuario con ese correo electrónico.",
+      });
+    }
+
+    const resetPasswordLink = `https://tu-sitio-web.com/resetPassword`;
+
+    const mailOptions = {
+      from: '"Awericana" <awericana@gmail.com>',
+      to: user.email,
+      subject: "Cambio de contraseña",
+      html: `Haz clic en el siguiente enlace para restablecer tu contraseña:<br/><a href="${resetPasswordLink}">${resetPasswordLink}</a>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({
+      message:
+        "Se ha enviado un código de confirmación a tu correo electrónico.",
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "Ocurrió un error al procesar tu solicitud." });
+  }
+};
+
+const newPassword = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    console.log(email, password);
+    const newPassword = await encrypt(password);
+    // const body = { ...req, password };
+    // const dataUser = await Usuario.create(body);
+
+    await Usuario.update(
+      { password: newPassword },
+      { where: { email: email } }
+    );
+
+    res.json({ msg: "Password successfully changed!" });
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
+
+module.exports = {
+  userRegister,
+  userLogin,
+  userGet,
+  logoutUser,
+  loginSuccess,
+  changePassword,
+  newPassword,
+};

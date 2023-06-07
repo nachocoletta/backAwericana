@@ -44,15 +44,14 @@ const verificarDisponibilidadReclamo= async (publicacionId, compradorId) => {
 
 
 
-const enviarReclamo = async ({name, mail, subject, message, image, compradorId, publicacionId }) => {
-    console.log(name, mail, subject, message, image, compradorId, publicacionId );
-    /*await transporter.sendMail({
+const enviarReclamo = ({name, mail, subject, message, image, compradorId, publicacionId }) => {
+    transporter.sendMail({
         from: `"${name}" <${mail}>'`, 
         to: 'awericana@gmail.com', 
         subject, 
-        text: `[ Comprador: ${compradorId} ] [ reclamo sobre:  ${publicacionId} ] ${message}` 
-        html: "<img src = `${image}` width = "500" height = "500" />", 
-      });*/
+        text: `[ Comprador: ${compradorId} ] [ reclamo sobre:  ${publicacionId} ] ${message}` ,
+        html: `<img src = ${image} width = "500" height = "500" />`, 
+      });
 
       return true;
 }

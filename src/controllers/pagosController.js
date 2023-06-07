@@ -10,77 +10,89 @@ mercadopago.configure({
 });
 
 async function getUrlPago(req, res) {
-  const { userid } = req.params;
-  const {direccionId } = req.query
-  // verificar que no te puedas comprar a vos mismo.
-  // implementar que en la funcion que aniade al carrito, no pueda si el id del usuario que quiere agregar al carrito
-  // es igual al del duenio la publicacion.
-
-  let carrito = await Carrito.findAll({
-    include: [Publicacion],
-    where: { usuarioId: userid },
-  });
-
-  const compradorUser = await Usuario.findOne({
-    where: { id: userid },
-    include: [Direccion],
-  });
-  
-  const vendedorUser = await Usuario.findOne({
-    where: { id: carrito[0].publicacion.usuarioId },
-    include: [Direccion],
-  });
-  
-  // const carritoData = carrito.get({plain:true})
-  const compradorUserData = compradorUser.get({plain:true})
-  const vendedorUserData = vendedorUser.get({plain:true})
-
-  // console.log( 'ashee', compradorUserData,"olaf",  vendedorUserData)
-  
-  // console.log(compradorUser, vendedorUser)
-  // console.log(compradorUserData)
-  let latitudOrigen = compradorUserData.direccions[0].latitud
-  let longitudOrigen = compradorUserData.direccions[0].longitud
-  let latitudDestino = vendedorUserData.direccions[0].latitud
-  let longitudDestino = vendedorUserData.direccions[0].longitud
-
-  // let latitudDestino = -34.660324
-  // let longitudDestino = -58.551241
-
-  // console.log(latitudOrigen, longitudOrigen, latitudDestino, longitudDestino)
-    
-  const cost = await calcularDistancia(latitudOrigen, longitudOrigen, latitudDestino, longitudDestino);
-    
-  let UrlNotification = URL_NOTIFICATION ? URL_NOTIFICATION : URL;
-
-  // console.log(UrlNotification);
-
-  // console.log(carrito[0].publicacion)
-
-  if (!carrito || carrito.length === 0){
-    return res.status(404).json({
-      Error:
-        "No se ha encontrado un carrito con publicaciones para el usuario enviado!",
-    });
-  }
-
-  let carritoMapeado = carrito?.map((p) => {
-    return {
-      currency_id: "ARS",
-      title: p.publicacion.titulo,
-      unit_price: p.publicacion.precio,
-      quantity: 1,
-      description: p.publicacion.descripcion,
-      picture_url: p.publicacion.imagenPortada,
-    };
-  });
-
   try {
+
+    const { userid } = req.params;
+    const {direccionId } = req.query
+    // verificar que no te puedas comprar a vos mismo.
+    // implementar que en la funcion que aniade al carrito, no pueda si el id del usuario que quiere agregar al carrito
+    // es igual al del duenio la publicacion.
+    
+    const compradorUser = await Usuario.findOne({
+      where: { id: userid },
+      include: [Direccion],
+    });
+    
+    
+    
+    
+    const compradorUserData = compradorUser.get({plain:true})
+
+
+    let carrito = await Carrito.findAll({
+      include: [Publicacion],
+      where: { usuarioId: userid },
+    });
+  
+    if(!carrito) return res.status(404).json({Error: "Error, no se pudo encontrar su carrito o su carrito esta vacio"})
+  
+
+    const vendedorUser = await Usuario.findOne({
+      where: { id: carrito[0].publicacion.usuarioId },
+      include: [Direccion],
+    });
+
+    const vendedorUserData = vendedorUser.get({plain:true})
+
+    
+    if(!vendedorUser || !compradorUser) return res.status(404).json({Error: "Error, no se encontro a uno o ninguno de los usuarios."}) 
+  
+    // const carritoData = carrito.get({plain:true})
+  
+    if(compradorUserData.direccions.length === 0 || vendedorUserData.direccions.length === 0) return res.status(404).json({Error: "Error, uno o ninguno de los usuario tiene direcciones registradas."})  
+  
+    // console.log(compradorUser, vendedorUser)
+    // console.log(compradorUserData)
+    let latitudOrigen = compradorUserData.direccions[0].latitud
+    let longitudOrigen = compradorUserData.direccions[0].longitud
+    let latitudDestino = vendedorUserData.direccions[0].latitud
+    let longitudDestino = vendedorUserData.direccions[0].longitud
+  
+    // let latitudDestino = -34.660324
+    // let longitudDestino = -58.551241
+  
+    // console.log(latitudOrigen, longitudOrigen, latitudDestino, longitudDestino)
+      
+    const cost = await calcularDistancia(latitudOrigen, longitudOrigen, latitudDestino, longitudDestino);
+      
+    let UrlNotification = URL_NOTIFICATION ? URL_NOTIFICATION : URL;
+  
+    // console.log(UrlNotification);
+  
+    // console.log(carrito[0].publicacion)
+  
+    if (!carrito || carrito.length === 0){
+      return res.status(404).json({
+        Error:
+          "No se ha encontrado un carrito con publicaciones para el usuario enviado!",
+      });
+    }
+  
+    let carritoMapeado = carrito?.map((p) => {
+      return {
+        currency_id: "ARS",
+        title: p.publicacion.titulo,
+        unit_price: p.publicacion.precio,
+        quantity: 1,
+        description: p.publicacion.descripcion,
+        picture_url: p.publicacion.imagenPortada,
+      };
+    });
     const result = await mercadopago.preferences.create({
       back_urls: {
-        success: `${URL_FRONT}/pagos/success`,
+        success: `${URL_FRONT}/cart/payment-ponfirmed`,
         pending: `${URL_FRONT}/pagos/pending`,
-        failure: `${URL_FRONT}/pagos/failure`,
+        failure: `${URL_FRONT}/cart/error-payment`,
       },
       items: carritoMapeado,
       shipments: {
@@ -92,7 +104,8 @@ async function getUrlPago(req, res) {
 
     res.send(result.body.init_point);
   } catch (error) {
-    return res.status(500).json({ message: "Something goes wrong" });
+    console.log(error);
+    return res.status(500).json({ message: `Something goes wrong, ${error}` });
   }
 }
 

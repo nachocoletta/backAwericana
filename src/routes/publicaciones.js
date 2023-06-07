@@ -16,7 +16,11 @@ const router = Router();
 
 router.get('/' ,    obtenerPublicaciones);
 
-router.get('/:id' , obtenerPublicacion);
+router.get('/:id' , [
+    param('id', 'El id de la publicación debe ser entero mayor a 0').isInt({min:1}),
+    validarCampos
+],
+obtenerPublicacion);
 
 router.post('/' , [
     authMiddleware,
@@ -32,6 +36,7 @@ router.post('/' , [
 
 router.put('/:id' , [
     authMiddleware,
+    param('id', 'El id de la publicación debe ser entero mayor a 0').isInt({min:1}),
     body('precio', 'El valor del precio no es valido.').isDecimal().notEmpty(),
     body('titulo', 'El titulo debe tener entre 1 y 50 caracteres').isString().isLength({min:1, max:50}),
     body('descripcion', 'La descripción debe tener entre 10 y 200 caracteres').isString().isLength({min:10, max:200}),
@@ -44,12 +49,14 @@ router.put('/:id' , [
 
 router.patch('/:id' , [
     authMiddleware,
+    param('id', 'El id de la publicación debe ser entero mayor a 0').isInt({min:1}),
     body('descuento', 'El valor del descuento debe ser entero entre 1 y 99').optional().isInt({min:1, max:99}),
     validarCampos
 ], configurarDescuento);
 
 router.delete('/:id' ,[
     authMiddleware,
+    param('id', 'El id de la publicación debe ser entero mayor a 0').isInt({min:1}),
     checkRole(['admin', 'user']),
 ],  eliminarPublicacion);
 

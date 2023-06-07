@@ -1,15 +1,14 @@
 const transporter = require("../config/mailer");
 const {Usuario, Publicacion} = require("../db");
 
-const enviarMail = async ({nombre, apellido, correo, subject, message }) => {
-    console.log('Mail enviado');
-    /*await transporter.sendMail({
+const enviarMail = async ({correo, subject, message }) => {
+   transporter.sendMail({
         from: `"Awericana" <awericana@gmail.com>'`, 
         to: `${correo}`, 
         subject, 
         text: `${message}` 
         //html: "<b>Hello world?</b>", // html body
-      });*/
+      });
 
 }
 
@@ -38,8 +37,6 @@ const notificarCompraVenta = async (usuarioId, publicacionId) => {
     
     enviarMail(camposParaEmailaVendedor);
     enviarMail(camposParaEmailaComprador);
-
-    console.log("Notificaciones por email de compra y venta enviadas.")
 }
 
 module.exports = {

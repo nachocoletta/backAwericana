@@ -6,7 +6,9 @@ const {
   Producto,
   Pais,
   Persona,
-  Usuario
+  Usuario,
+  Publicacion,
+  Imagen
 } = require("../db.js"); 
 
 //const router = Router();
@@ -18,13 +20,23 @@ const { personas } = require("./personas.js");
 const { categorias } = require("./categorias.js");
 const { productos } = require('./productos.js');
 const { admin } = require('./admin.js');
+const { publicaciones } = require('./publicaciones.js');
 
 //Importar usuarios de prueba para el desarrollo
 const { usuarios } = require('./usuarios.js');
+const { crearPublicacion } = require("../controllers/publicaciones.js");
 
 //Volcar datos de los seeders en la Base de datos
 const poblarBaseDeDatos = async () => {
   try {
+    const existeUsuarios = await Usuario.findOne(); 
+    if(!existeUsuarios){
+      await Usuario.bulkCreate(admin);
+      
+      //Cargar usuarios para pruebas
+      await Usuario.bulkCreate(usuarios); 
+    }
+
     const existenDatosPais = await Pais.findOne();
     if(!existenDatosPais){
       await Pais.bulkCreate(paises);
@@ -47,16 +59,29 @@ const poblarBaseDeDatos = async () => {
 
     const existenDatosProductos = await Producto.findOne();    
     if(!existenDatosProductos){
-      await Producto.bulkCreate(productos)
-    } 
-
-    const existeUsuarios = await Usuario.findOne(); 
-    if(!existeUsuarios){
-      await Usuario.bulkCreate(admin);
-      
-      //Cargar usuarios para pruebas
-      await Usuario.bulkCreate(usuarios); 
+      await Producto.bulkCreate(productos);
     }
+    
+    const existenDatosPublicaciones = await Publicacion.findOne();    
+    if(!existenDatosPublicaciones){
+
+      publicaciones.forEach(async(publicacion) => {
+        let publicacionASubir = await Publicacion.create(publicacion.body);
+        await publicacionASubir.save();
+
+        publicacion.images.forEach(async(imagen) => {
+          let imagenParaSubir = await Imagen.create({
+            link: imagen.link,
+            publicacionId : publicacionASubir.id
+          });
+          await imagenParaSubir.save(); 
+        });
+
+      });
+        
+    }  
+
+    
 
     return true;
     

@@ -19,7 +19,7 @@ module.exports = (sequelize) => {
     },
     fecha: {
       type: DataTypes.DATEONLY,
-      allowNull: false,
+      allowNull: true,
     },
   });
 };

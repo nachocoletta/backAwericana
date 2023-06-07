@@ -1,7 +1,6 @@
 const { Usuario, Review } = require("../db");
 
 const { Sequelize } = require("sequelize");
-console.log("Me estoy ejecutando");
 
 Review.afterCreate(async (review, options) => {
   const usuarioAdminId = review.usuario_admin_id;
