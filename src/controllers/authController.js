@@ -89,7 +89,8 @@ const userLogin = async (req, res) => {
     res.cookie("sessionLocal", data.token, {
       expires: new Date(Date.now() + expirationTime),
       httpOnly: true,
-      sameSite: 'none'
+      sameSite: 'none',
+      secure: true
     });
     res.status(200).json(data);
   } catch (error) {
