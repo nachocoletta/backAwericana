@@ -19,6 +19,7 @@ server.use(
     name: "session",
     keys: [process.env.JWT_SECRET],
     maxAge: 24 * 60 * 60 * 100,
+    sameSite: 'none'  
   })
 );
 
