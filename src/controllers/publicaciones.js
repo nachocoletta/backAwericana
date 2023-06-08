@@ -192,7 +192,7 @@ const configurarDescuento = async( req, res) =>{
     const {id} = req.params;
     const {id : usuarioId} = req.user;
     const {descuento} = req.body;
-        
+        console.log(id, descuento)
     try {
         const publicacion = await Publicacion.findOne({
             where:{
@@ -206,11 +206,11 @@ const configurarDescuento = async( req, res) =>{
             return res.status(404).json({msg: `La publicación con el id:${id} no existe.`})
         }
 
-        if(!publicacion.oferta){
+        if(descuento > 0 && publicacion.oferta === false){
             const precioCopia = publicacion.precio;
             
             const cambios = {
-                precio : publicacion.precio - (publicacion.precio * (descuento / 100)),
+                precio : Number((publicacion.precio - (publicacion.precio * (descuento / 100))).toFixed(2)),
                 precioOriginal: precioCopia,
                 oferta: true,
                 descuento
@@ -218,26 +218,45 @@ const configurarDescuento = async( req, res) =>{
 
             await publicacion.update(cambios); 
         
-            res.status(201).json({
+            res.status(200).json({
                 msg: "El descuento fue aplicado.",
                 publicacion
             })
-        }else{
+        }else if(descuento > 0 && publicacion.oferta === true){
+            const cambios = {
+                precio : Number((publicacion.precioOriginal - (publicacion.precioOriginal * (descuento / 100))).toFixed(2)),
+                descuento
+            }
+
+            await publicacion.update(cambios); 
+        
+            res.status(200).json({
+                msg: "El descuento fue aplicado.",
+                publicacion
+            })
+        }else if(descuento === 0 && publicacion.oferta === true){
             const cambios = { 
                 oferta: false,
                 precioOriginal: null,
-                descuento: 0
+                descuento: 0,
+                precio: publicacion.precioOriginal
             }
-           
-            publicacion.precioOriginal && (cambios.precio = publicacion.precioOriginal);
             
             await publicacion.update(cambios); 
         
-            res.status(201).json({
+            res.status(200).json({
                 msg: "El descuento fue quitado.",
                 publicacion
             })
-        } 
+        }else if(descuento === 0 && publicacion.oferta === false){
+                   
+            res.status(200).json({
+                msg: "No hubo cambios",
+                publicacion
+            })
+        }
+
+        
 
     } catch (error) {
         console.log(error);

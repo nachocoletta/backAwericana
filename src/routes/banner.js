@@ -1,13 +1,11 @@
 const { Router } = require("express");
-const { body, param } = require('express-validator');
+const { param } = require('express-validator');
+
 const { validarCampos } = require("../middlewares/validar-campos");
-const {
-    obtenerImagenes,
-    subirImagen,
-    borrarImagen
-} = require("../controllers/banner.js");
 const authMiddleware = require("../middlewares/session");
 const checkRole = require("../middlewares/role");
+
+const { obtenerImagenes, subirImagen, borrarImagen } = require("../controllers/banner.js");
 
 const router = Router();
 
@@ -20,7 +18,9 @@ router.post('/', [
 
 router.delete('/:id', [
     authMiddleware,
-    checkRole(['admin'])
+    checkRole(['admin']),
+    param('id', 'El id debe ser entero mayor a 0').isInt({min:1}),
+    validarCampos
 ], borrarImagen)
 
 module.exports = router;

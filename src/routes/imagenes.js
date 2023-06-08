@@ -1,9 +1,6 @@
 const { Router } = require("express");
-const { body, param } = require('express-validator');
-const { validarCampos } = require("../middlewares/validar-campos");
-const {
-    obtenerImagenes,
-} = require("../controllers/imagen.js");
+
+const { obtenerImagenes } = require("../controllers/imagen.js");
 
 const router = Router();
 

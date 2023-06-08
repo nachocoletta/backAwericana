@@ -1,26 +1,36 @@
 const { Router } = require("express");
 const { body, param } = require('express-validator');
+
 const { validarCampos } = require("../middlewares/validar-campos");
-const { 
-        obtenerFavoritos,
-        vaciarFavoritos,
-        alternarFavorito 
-} = require("../controllers/favoritos");
 const authMiddleware = require("../middlewares/session");
+
+const { 
+    obtenerFavoritos,
+    vaciarFavoritos,
+    alternarFavorito,
+    verificarFavorito
+} = require("../controllers/favoritos");
 
 const router = Router();
 
-router.get('/:usuarioId' , [
-    authMiddleware
+router.get('/' , [
+    authMiddleware,
+    validarCampos
 ], obtenerFavoritos);
 
-router.post('/:usuarioId' , [
+router.get('/:publicacionId' , [
     authMiddleware,
-    body('publicacionId', 'El id de la publicacion no es valido.').isInt({min:1}),
+    param('publicacionId', 'El id debe ser entero mayor a 0').isInt({min:1}),
+    validarCampos
+], verificarFavorito);
+
+router.post('/:publicacionId' , [
+    authMiddleware,
+    param('publicacionId', 'El id debe ser entero mayor a 0').isInt({min:1}),
     validarCampos
 ] , alternarFavorito );
 
-router.delete('/:usuarioId', [
+router.delete('/', [
     authMiddleware
 ] , vaciarFavoritos );
 

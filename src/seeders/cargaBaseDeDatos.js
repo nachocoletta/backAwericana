@@ -1,4 +1,3 @@
-//const { Router } = require("express");
 //Importar modelos
 const {
   Talle,
@@ -11,8 +10,6 @@ const {
   Imagen
 } = require("../db.js"); 
 
-//const router = Router();
-
 //importar datos que permaneceran en producción
 const { paises } = require("./paises.js");
 const { talles } = require("./talles.js");
@@ -20,13 +17,12 @@ const { personas } = require("./personas.js");
 const { categorias } = require("./categorias.js");
 const { productos } = require('./productos.js');
 const { admin } = require('./admin.js');
+
+//Importar datos que solo se usaran en el desarrollo
+const { usuarios } = require('./usuarios.js');
 const { publicaciones } = require('./publicaciones.js');
 
-//Importar usuarios de prueba para el desarrollo
-const { usuarios } = require('./usuarios.js');
-const { crearPublicacion } = require("../controllers/publicaciones.js");
-
-//Volcar datos de los seeders en la Base de datos
+//Rellenar la base de datos con los datos de los archivos seeders
 const poblarBaseDeDatos = async () => {
   try {
     const existeUsuarios = await Usuario.findOne(); 
@@ -62,9 +58,11 @@ const poblarBaseDeDatos = async () => {
       await Producto.bulkCreate(productos);
     }
     
+    //cargar publicaciones para pruebas
     const existenDatosPublicaciones = await Publicacion.findOne();    
     if(!existenDatosPublicaciones){
-
+      //Por cada publicación: cargar en la tabla publicaciones con los datos del campo 'body'
+      // y luego cargar la tabla de imagenes con los datos del campo 'images'
       publicaciones.forEach(async(publicacion) => {
         let publicacionASubir = await Publicacion.create(publicacion.body);
         await publicacionASubir.save();
@@ -72,17 +70,14 @@ const poblarBaseDeDatos = async () => {
         publicacion.images.forEach(async(imagen) => {
           let imagenParaSubir = await Imagen.create({
             link: imagen.link,
-            publicacionId : publicacionASubir.id
+            publicacionId : publicacionASubir.id //id que se obtuvo al cargar la publicación
           });
           await imagenParaSubir.save(); 
         });
 
-      });
-        
+      });    
     }  
-
-    
-
+  
     return true;
     
   } catch (error) {
@@ -90,13 +85,5 @@ const poblarBaseDeDatos = async () => {
     return false;
   }
 };
-
-/*router.post("/", async (req, res) => {
-  if (await poblarBaseDeDatos()) {
-    return res.status(200).json({ message: "base de datos inicializada" });
-  } else {
-    return res.status(400).json({ error: "no se pudo cargar" });
-  }
-}); */
 
 module.exports = poblarBaseDeDatos;

@@ -1,6 +1,10 @@
 const { Router } = require("express");
 const { body, param } = require('express-validator');
+
 const { validarCampos } = require("../middlewares/validar-campos");
+const authMiddleware = require("../middlewares/session");
+const checkRole = require("../middlewares/role");
+
 const {
     actualizarPublicacion,
     configurarDescuento,
@@ -9,12 +13,10 @@ const {
     obtenerPublicacion,
     obtenerPublicaciones
 } = require("../controllers/publicaciones");
-const authMiddleware = require("../middlewares/session");
-const checkRole = require("../middlewares/role");
 
 const router = Router();
 
-router.get('/' ,    obtenerPublicaciones);
+router.get('/' , obtenerPublicaciones);
 
 router.get('/:id' , [
     param('id', 'El id de la publicación debe ser entero mayor a 0').isInt({min:1}),
@@ -47,10 +49,10 @@ router.put('/:id' , [
     validarCampos
 ], actualizarPublicacion);
 
-router.patch('/:id' , [
+router.put('/:id/descuento' , [
     authMiddleware,
     param('id', 'El id de la publicación debe ser entero mayor a 0').isInt({min:1}),
-    body('descuento', 'El valor del descuento debe ser entero entre 1 y 99').optional().isInt({min:1, max:99}),
+    body('descuento', 'El valor del descuento debe ser entero').isInt({min:0}),
     validarCampos
 ], configurarDescuento);
 

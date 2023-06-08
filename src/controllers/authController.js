@@ -50,7 +50,7 @@ const userRegister = async (req, res) => {
 const userLogin = async (req, res) => {
   try {
     req = matchedData(req);
-    console.log(req);
+
     const user = await Usuario.findOne({
       where: { email: req.email },
       attributes: [
@@ -68,6 +68,12 @@ const userLogin = async (req, res) => {
       handleHttpError(res, "USER_NO_REGISTRADO", 404);
       return;
     }
+    
+    if (!user.habilitado) {
+      handleHttpError(res, "USER_BANEADO", 400);
+      return;
+    }
+
     const hashPassword = user.password;
     const check = await compare(req.password, hashPassword);
     if (!check) {

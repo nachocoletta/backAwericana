@@ -1,14 +1,8 @@
 const { Router } = require("express");
-// Importar todos los routers;
-// Ejemplo: const authRouter = require('./auth.js');
-const fakeRouter = require("../Helpers/fakeGenerator");
 
 const router = Router();
 
-// Configurar los routers
-// Ejemplo: router.use('/auth', authRouter);
-router.use("/fake", fakeRouter);
-
+//Importar rutas
 const productsRoute = require("./producto");
 const publicaciones = require("./publicaciones");
 const carrito = require("./carrito");
@@ -27,8 +21,10 @@ const banner = require("./banner");
 const imagenes = require("./imagenes");
 const direcciones = require("./direccion");
 const review = require("./review");
-const paises = require('./paises')
+const paises = require('./paises');
+const fakeRouter = require("../Helpers/fakeGenerator");
 
+//Usarlas
 router.use("/producto", productsRoute);
 router.use("/auth", authRouter);
 router.use("/publicaciones", publicaciones);
@@ -47,5 +43,7 @@ router.use("/personas", genero);
 router.use("/imagenes", imagenes);
 router.use("/direcciones", direcciones);
 router.use("/review", review);
-router.use('/paises', paises)
+router.use('/paises', paises);
+router.use("/fake", fakeRouter);
+
 module.exports = router;

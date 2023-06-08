@@ -9,6 +9,61 @@ mercadopago.configure({
   access_token: ACCESS_TOKEN_MP,
 });
 
+async function getPrecioEnvio(req, res){
+  try {
+    
+  const { userid } = req.params;
+
+  let carrito = await Carrito.findAll({
+   include: [Publicacion],
+   where: { usuarioId: userid },
+ });
+ 
+ if (!carrito || carrito.length === 0){
+   return res.status(404).json({
+     Error:
+       "No se ha encontrado un carrito con publicaciones para el usuario enviado!",
+   });
+ }
+ 
+ const compradorUser = await Usuario.findOne({
+   where: { id: userid },
+   include: [Direccion],
+ });
+ 
+ const vendedorUser = await Usuario.findOne({
+   where: { id: carrito[0].publicacion.usuarioId },
+   include: [Direccion],
+ });
+ 
+ // const carritoData = carrito.get({plain:true})
+ const compradorUserData = compradorUser.get({plain:true})
+ const vendedorUserData = vendedorUser.get({plain:true})
+
+ // console.log( 'ashee', compradorUserData,"olaf",  vendedorUserData)
+  
+ // console.log(compradorUser, vendedorUser)
+ // console.log(compradorUserData)
+ let latitudOrigen = compradorUserData.direccions[0].latitud
+ let longitudOrigen = compradorUserData.direccions[0].longitud
+ let latitudDestino = vendedorUserData.direccions[0].latitud
+ let longitudDestino = vendedorUserData.direccions[0].longitud
+
+ // let latitudDestino = -34.660324
+ // let longitudDestino = -58.551241
+
+ // console.log(latitudOrigen, longitudOrigen, latitudDestino, longitudDestino)
+   
+ const cost = await calcularDistancia(latitudOrigen, longitudOrigen, latitudDestino, longitudDestino);
+ res.json(cost)
+  } catch (error) {
+    console.log(error)
+    res.status(404).json({Error:error})
+  }
+
+
+}
+
 async function getUrlPago(req, res) {
   try {
 
@@ -37,10 +92,12 @@ async function getUrlPago(req, res) {
     if(!carrito) return res.status(404).json({Error: "Error, no se pudo encontrar su carrito o su carrito esta vacio"})
   
 
+
     const vendedorUser = await Usuario.findOne({
       where: { id: carrito[0].publicacion.usuarioId },
       include: [Direccion],
     });
+
 
     const vendedorUserData = vendedorUser.get({plain:true})
 
@@ -194,4 +251,6 @@ async function notificarYConfirmarPago(req, res) {
 module.exports = {
   getUrlPago,
   notificarYConfirmarPago,
+  getPrecioEnvio,
+
 };

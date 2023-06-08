@@ -1,5 +1,11 @@
 const { Router } = require("express");
+const { body, param } = require('express-validator');
 const router = Router();
+
+const authMiddleware = require("../middlewares/session");
+const checkRole = require("../middlewares/role");
+const { validarCampos } = require("../middlewares/validar-campos");
+
 const {
   getReviews,
   getReview,
@@ -7,9 +13,6 @@ const {
   updateReview,
   deleteReview,
 } = require("../controllers/reviewController");
-
-const authMiddleware = require("../middlewares/session");
-const checkRole = require("../middlewares/role");
 
 router.get("/", getReviews);
 
@@ -20,12 +23,16 @@ router.post("/", [
 ] , createReview);
 
 router.put("/:id", [
-  authMiddleware
+  authMiddleware,
+  param('id', 'El id debe ser entero mayor a 0').isInt({min:1}),
+  validarCampos
 ], updateReview);
 
 router.delete("/:id", [
   authMiddleware,
   checkRole(['admin']),
+  param('id', 'El id debe ser entero mayor a 0').isInt({min:1}),
+  validarCampos
 ], deleteReview);
 
 module.exports = router;

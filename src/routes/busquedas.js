@@ -1,6 +1,8 @@
 const { Router } = require("express");
-const { body, param , query} = require('express-validator');
+const { query} = require('express-validator');
+
 const { validarCampos } = require("../middlewares/validar-campos");
+
 const { buscar } = require("../controllers/busquedas");
 
 const router = Router();

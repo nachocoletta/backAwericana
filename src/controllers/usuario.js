@@ -1,5 +1,6 @@
 const { where } = require("sequelize");
 const { Usuario, Publicacion } = require("../db");
+const { quitarPublicaciones } = require("../Helpers/quitarPublicacionDeListas");
 
 const obtenerUsuarios = async (req, res) => {
   const usuarios = await Usuario.findAll();
@@ -86,6 +87,11 @@ const inhabilitarOHabilitarUsuario = async (req, res) => {
         msg: `El usuario con ID: ${id} no se encuentra en la base de datos`,
       });
     } else {
+
+      if(habilitado === "false"){
+        quitarPublicaciones(id);
+      }
+
       await Usuario.update(
         {
           habilitado,
@@ -96,6 +102,7 @@ const inhabilitarOHabilitarUsuario = async (req, res) => {
           },
         }
       );
+      
       res
         .status(200)
         .json({ msg: `Usuario con ID: ${id} correctamente actualizado` });

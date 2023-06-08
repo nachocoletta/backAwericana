@@ -1,6 +1,9 @@
 const { Router } = require("express");
 const { body, param } = require('express-validator');
+
 const { validarCampos } = require("../middlewares/validar-campos");
+const authMiddleware = require("../middlewares/session");
+
 const { 
     iniciarReclamo,
     actualizarEstadoEnvio,
@@ -8,7 +11,7 @@ const {
     chequearReclamo,
     avanzarDevolucion
 } = require("../controllers/posventa");
-const authMiddleware = require("../middlewares/session");
+
 
 const router = Router();
 

@@ -1,13 +1,15 @@
 const { Router } = require("express");
 const { body, param } = require('express-validator');
+
 const { validarCampos } = require("../middlewares/validar-campos");
+const authMiddleware = require("../middlewares/session");
+
 const {
     obtenerDirecciones,
     eliminarDireccion,
     crearDireccion,
     modificarDireccion
 } = require("../controllers/direccion.js");
-const authMiddleware = require("../middlewares/session");
 
 
 const router = Router();
@@ -28,11 +30,15 @@ router.post('/',
 crearDireccion);
 
 router.put('/:id', [ 
-    authMiddleware
+    authMiddleware,
+    param('id', 'El id debe ser entero mayor a 0').isInt({min:1}),
+    validarCampos
 ], modificarDireccion);
 
 router.delete('/:id' , [ 
-    authMiddleware
+    authMiddleware,
+    param('id', 'El id debe ser entero mayor a 0').isInt({min:1}),
+    validarCampos
 ], eliminarDireccion);
 
 module.exports = router;

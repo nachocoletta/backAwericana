@@ -11,8 +11,8 @@ const calcularMonto = (carrito) => {
         }       
     });
 
-    //Devolver el monto
-    return monto;
+    //Devolver el monto con los decimales recortados
+    return Number((monto).toFixed(2));
 }
 
 //Controlador para obtener el carrito del usuario logueado
