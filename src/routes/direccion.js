@@ -8,13 +8,20 @@ const {
     obtenerDirecciones,
     eliminarDireccion,
     crearDireccion,
-    modificarDireccion
+    modificarDireccion,
+    obtenerDireccion
 } = require("../controllers/direccion.js");
 
 
 const router = Router();
 
 router.get('/', [ authMiddleware ], obtenerDirecciones);
+
+router.get('/:direccionId', [ 
+    authMiddleware,
+    param('direccionId', 'El id debe ser entero mayor a 0').isInt({min:1}),
+    validarCampos
+], obtenerDireccion);
 
 router.post('/', 
     [

@@ -27,6 +27,34 @@ const obtenerDirecciones = async (req, res) => {
         res.status(404).json({msg: `El usuario con ID ${id} no tiene direcciones asociadas`}) 
 }
 
+const obtenerDireccion = async (req, res) => {
+    const { id } = req.user;
+    const {direccionId} = req.params;
+
+    try {
+        const direccion = await Direccion.findOne({
+            where: {
+                id: direccionId,
+                usuarioId: id
+            }
+        });
+
+        if(!direccion){
+            return res.status(404).json({msg: `La dirección con el ID: ${direccionId} no existe.`});
+        }
+    
+        res.status(200).json(direccion);
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            msg: 'Error en el servidor.'
+        })  
+    }
+
+    
+}
+
 const eliminarDireccion = async (req, res) => {
     const { id } = req.params
     
@@ -138,4 +166,4 @@ const modificarDireccion = async (req, res) => {
     }
 }
 
-module.exports = { obtenerDirecciones, eliminarDireccion, crearDireccion, modificarDireccion}
+module.exports = { obtenerDirecciones, eliminarDireccion, crearDireccion, modificarDireccion, obtenerDireccion}
