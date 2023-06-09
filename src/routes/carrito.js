@@ -8,23 +8,19 @@ const { obtenerCarrito, agregarAlCarrito, quitarDelCarrito } = require("../contr
 
 const router = Router();
 
-router.get('/:usuarioId' , [
-    authMiddleware,
-    param('id', 'El id debe ser entero mayor a 0').isInt({min:1}),
-    validarCampos
+router.get('/' , [
+    authMiddleware
 ], obtenerCarrito );
 
-router.post('/:usuarioId' , [
+router.post('/' , [
     authMiddleware,
     body('publicacionId', 'El id de la publicacion no es valido.').isInt({min:1}),
-    param('id', 'El id debe ser entero mayor a 0').isInt({min:1}),
     validarCampos
 ] , agregarAlCarrito );
 
-router.delete('/:usuarioId' , [
+router.delete('/' , [
     authMiddleware,
     body('publicacionId', 'El id de la publicacion no es valido.').optional().isInt({min:1}),
-    param('id', 'El id debe ser entero mayor a 0').isInt({min:1}),
     validarCampos
 ], quitarDelCarrito );
 
